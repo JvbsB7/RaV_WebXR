@@ -2,29 +2,171 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>WebXR + Three.js + TypeScript</title>
+    <!--
+      Sem maximum-scale nem user-scalable=no: quem lê num aparelho de mão precisa
+      poder aproximar o texto. Travar o zoom é confortável para quem desenhou a
+      página e hostil para quem a lê.
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sonda de capacidades (módulo 02)</title>
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body { height: 100%; overflow: hidden; background: #101015; }
-      #app { position: fixed; inset: 0; }
-      #info {
-        position: fixed;
-        top: 12px;
-        left: 0;
-        width: 100%;
-        text-align: center;
-        color: #fff;
-        font-family: system-ui, sans-serif;
-        font-size: 14px;
-        pointer-events: none;
-        text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+      /*
+        O corpo de texto é generoso de propósito. Este relatório é lido no próprio
+        aparelho sondado, a um braço de distância, e com a resolução angular que um
+        visor tem. Não é leitura de tela de computador.
+
+        O alvo dos botões é grande pela mesma razão: num visor a mira é um raio de
+        controle a um metro, e alvo pequeno vira exercício de pontaria.
+      */
+      :root {
+        --fundo: #12131a;
+        --fundo-caixa: #1b1d27;
+        --texto: #e8e9ef;
+        --texto-fraco: #a4a8bb;
+        --borda: #2e3040;
+        --acento: #6f9bff;
+        --bom: #4ade80;
+        --ruim: #f87171;
+        --duvida: #fbbf24;
       }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        background: var(--fundo);
+        color: var(--texto);
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-size: 18px;
+        line-height: 1.65;
+        padding: 24px 20px 96px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      h1 { font-size: 1.7rem; line-height: 1.25; margin-bottom: 8px; }
+      h2 { font-size: 1.35rem; margin: 28px 0 10px; }
+      h3 { font-size: 1.1rem; margin: 22px 0 8px; color: var(--acento); }
+      p { margin-bottom: 12px; }
+
+      .abertura {
+        border-left: 4px solid var(--acento);
+        background: var(--fundo-caixa);
+        padding: 14px 18px;
+        margin: 16px 0 28px;
+        color: var(--texto-fraco);
+      }
+
+      section { margin-bottom: 28px; }
+
+      /* Alvo grande: 56px de altura mínima, largura cheia em tela estreita. */
+      button {
+        font: inherit;
+        font-weight: 600;
+        min-height: 56px;
+        padding: 14px 28px;
+        width: 100%;
+        max-width: 440px;
+        border: none;
+        border-radius: 10px;
+        background: var(--acento);
+        color: #0d0f16;
+        cursor: pointer;
+      }
+      button:disabled { opacity: 0.55; cursor: progress; }
+
+      /* Tabela larga rola dentro de si, e não empurra a página de lado. */
+      .rolagem { overflow-x: auto; margin-bottom: 16px; }
+      table { border-collapse: collapse; width: 100%; min-width: 620px; }
+      th, td {
+        border: 1px solid var(--borda);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+        font-size: 0.92rem;
+      }
+      th { background: var(--fundo-caixa); color: var(--acento); }
+
+      /*
+        Os três estados têm cores diferentes, e o terceiro NÃO usa a cor do
+        negado. Pintar "sem resposta" de vermelho desfaria na tela a distinção
+        que o código inteiro existe para preservar.
+      */
+      .estado-concedido, .suporte-sim { color: var(--bom); }
+      .estado-negado, .suporte-nao { color: var(--ruim); }
+      .estado-indeterminado, .suporte-desconhecido { color: var(--duvida); }
+
+      .classe { font-size: 1.15rem; font-weight: 600; }
+      .graus { font-weight: 600; }
+      .graus-seis { color: var(--bom); }
+      .graus-tres { color: var(--duvida); }
+      .graus-indeterminado { color: var(--texto-fraco); }
+
+      .aviso { padding: 12px 14px; border-radius: 8px; font-weight: 500; }
+      .aviso-bom { background: rgba(74, 222, 128, 0.1); color: var(--bom); }
+      .aviso-ruim { background: rgba(248, 113, 113, 0.12); color: var(--ruim); }
+
+      .nota-de-rodape { color: var(--texto-fraco); font-size: 0.9rem; }
+
+      #diario {
+        background: var(--fundo-caixa);
+        border: 1px solid var(--borda);
+        border-radius: 10px;
+        padding: 14px 16px;
+        min-height: 64px;
+      }
+      .diario { margin-bottom: 8px; font-size: 0.92rem; }
+      .diario:last-child { margin-bottom: 0; }
+      .diario-nota { color: var(--texto-fraco); }
+      .diario-alerta { color: var(--duvida); }
+      .diario-falha { color: var(--ruim); }
+
+      .rodape { color: var(--texto-fraco); font-size: 0.9rem; margin-top: 40px; }
+      a { color: var(--acento); }
     </style>
   </head>
   <body>
-    <div id="app"></div>
-    <div id="info">Clique em <b>ENTER VR</b> ou <b>START AR</b>. No desktop, arraste para orbitar.</div>
-    <script type="module" src="/src/main.ts"></script>
+    <h1>Sonda de capacidades</h1>
+    <p class="abertura">
+      Este ambiente ainda não desenha coisa alguma. Ele pergunta ao aparelho o que
+      ele oferece (que regimes suporta, que recursos concede, que fontes de entrada
+      declara, quantos graus de liberdade rastreia) e mostra a resposta aqui, para
+      ser lida no próprio aparelho sondado. Abrir este mesmo endereço num desktop,
+      num celular e num visor deve produzir três relatórios diferentes.
+    </p>
+
+    <!-- Primeiro tempo: roda ao carregar, sem pedir gesto de ninguém. -->
+    <section id="regimes"></section>
+
+    <!--
+      Segundo tempo: espera o toque. O botão não é conveniência: o navegador
+      recusa o pedido de sessão imersiva que não venha de gesto de quem usa.
+    -->
+    <section>
+      <h2>A metade que só a sessão responde</h2>
+      <p>
+        Recursos concedidos, espaços de referência entregues e fontes de entrada são
+        propriedades da sessão, e não do navegador. Sondá-los de fora devolveria uma
+        lista de suposições.
+      </p>
+      <button id="sondar" type="button">Sondar este aparelho</button>
+    </section>
+
+    <section id="sonda"></section>
+
+    <section>
+      <h2>Diário</h2>
+      <p class="nota-de-rodape">
+        O que aconteceu, escrito onde se possa ler. Dentro de um visor não existe
+        console de depuração: quem está com a tela no rosto não abre painel de
+        desenvolvedor e não vê exceção alguma.
+      </p>
+      <div id="diario"></div>
+    </section>
+
+    <p class="rodape">
+      A cena Three.js deste repositório continua em <a href="/cena.html">/cena.html</a>.
+    </p>
+
+    <script type="module" src="/src/bancada/main.ts"></script>
   </body>
 </html>
