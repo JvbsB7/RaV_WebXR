@@ -10,11 +10,11 @@ Estado do projeto a partir do commit `8c27796` (especificação do Módulo 01). 
 | 2. Tarefa | Documentado | Montar seis peças e verificar alcance sentado. Estado final na seção 6. A validação completa pertence aos próximos módulos. |
 | 3. Três regimes | Declarado | Seção 9 e `ts/src/bancada/modes/regimes.ts`, com referência, rastreamento e registro. Cena atual por tela; VR/AR futuros. |
 | 4. Especificação | Atualizada | 14 seções preservadas. Registro das decisões do Módulo 03 ao fim da seção 14. |
-| 5. Sonda real | Código implementado, teste parcial | Consulta WebXR real e relatório sem inventar capacidades. O container respondeu sem suporte imersivo; recursos dentro de sessão precisam de um aparelho físico. |
-| 6. Relatório legível | Código implementado, registro parcial | Página HTML testada no Chromium. O grupo confirmou teste local no celular. Falta registrar modelo, navegador e resultados da sonda para a comparação entre aparelhos. |
+| 5. Sonda real | Executada em computador e celular | O computador declarou só janela. O celular abriu sessão immersive-ar e concedeu local-floor, unbounded, hit-test, anchors e plane-detection, com 6DoF. Limites encontrados: a classe do celular sai como "visor" e o dom-overlay é pedido sem `root`. Visor físico pendente. |
+| 6. Relatório legível | Lido nos dois aparelhos | Mesmo endereço, dois relatórios diferentes, lidos na própria tela de cada aparelho. Registro em `aparelhos.md` e capturas em `evidencias/sonda-*`. |
 | 7. Árvore | Verificado no navegador e teste numérico | Seis peças com dimensões do domínio. Garra e tubo móvel são filhos do suporte. Mover o pai transporta os filhos sem somar suas coordenadas. |
 | 8. Troca de pai | Verificado no navegador e casos de fronteira | Prato 1 troca tampo/suporte com posição preservada. Pais com rotação e escala uniforme também passaram. Escalas não uniformes/nulas e ciclos são recusados. |
-| 9. Relógio e orçamento | Implementado, validação física pendente | Relógio por tempo, painel dentro da cena, teto declarado. Teste simulado de cadências passou; intervalo no container ficou acima do teto. Falta comparação de computadores reais. |
+| 9. Relógio e orçamento | Implementado e medido em aparelhos reais | Relógio por tempo, painel dentro da cena, teto declarado. Teste simulado de cadências passou. Medido no computador do grupo (intervalo no teto, tela de 60 Hz) e num celular (média abaixo do teto, com quadros isolados acima). GPU não medida. |
 
 ## Decisões e alternativas apresentadas
 
@@ -29,7 +29,29 @@ Estado do projeto a partir do commit `8c27796` (especificação do Módulo 01). 
 
 ## Medição do navegador
 
-Fonte integral: `evidencias/browser.json`. Captura em 2026-09-23T23:49:43.972Z.
+Medições em aparelhos reais, com `/cena.html` servido pelo `pnpm dev` do computador do grupo, em HTTPS (`contextoSeguro: true` nos dois). Cada valor é a média dos últimos 120 quadros, exportada por **Salvar medição deste aparelho** com o suporte parado e o Prato 1 no tampo.
+
+| | Computador do grupo | Celular |
+| --- | --- | --- |
+| Fonte | `evidencias/medicao-pc.json`, 2026-09-26T16:07:27.976Z | `evidencias/medicao-celular.json`, 2026-09-26T15:59:51.453Z |
+| Aparelho | Dell Inspiron 15 3530, Intel Core i5-1334U (13ª geração), 16 GB, tela de 60 Hz | POCO X5 Pro 5G, GPU Adreno 642L |
+| Sistema e navegador | Windows 11 Home 10.0.26200, Chrome 153.0.8010.53 | Android 14 (UKQ1.240624.001), sistema da fabricante 2.0.17.0.UMSMIXM, Chrome 153. O navegador reduz a própria identificação para "Android 10; K"; a versão real foi lida no aparelho |
+| Renderizador | `ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x0000A7A1) Direct3D11 vs_5_0 ps_5_0, D3D11)` | `ANGLE (Qualcomm, Adreno (TM) 642L, OpenGL ES 3.2)` |
+| Viewport do canvas | 1570 × 808, pixel ratio 1 | 393 × 426, pixel ratio 2 |
+| CPU média | **1.10 ms** | **0.56 ms** |
+| Intervalo médio | **16.67 ms** | **16.36 ms** |
+| Geometria | 2858 triângulos, 60 chamadas | 2858 triângulos, 60 chamadas |
+
+- Teto: **16.67 ms** (1000 / 60).
+- No computador, o intervalo médio (16.6675 ms) coincide com o teto porque o navegador desenha no ritmo da tela de 60 Hz. Não é folga medida: é o limite imposto pelo monitor.
+- No celular, a média ficou abaixo do teto, mas quadros isolados passam dele: a captura `evidencias/cena-celular.jpg` mostra intervalo de 16,71 ms naquele instante. Não há alegação de 60 FPS sustentados em nenhum dos dois.
+- Nos dois aparelhos a CPU gasta menos de 7% do teto. O custo da GPU não é medido, então esse número sozinho não garante fluidez.
+- As capturas `evidencias/cena-pc.png` e `evidencias/cena-celular.jpg` mostram o painel em outro instante das mesmas execuções (PC: CPU 1,07 ms, intervalo 16,67 ms; celular: CPU 0,47 ms, intervalo 16,71 ms).
+- São medições pontuais de um aparelho de cada classe, não um benchmark.
+
+### Captura automatizada anterior (container)
+
+Fonte integral: `evidencias/browser.json`. Captura em 2026-09-23T23:49:43.972Z. Mantida como referência de um ambiente sem GPU.
 
 - Máquina: Container Linux, Chromium headless, renderização por software.
 - Sistema: linux 6.18.44. CPU: AMD EPYC 9V74 80-Core Processor. 9 CPUs lógicas e 10 GB expostos ao container.
@@ -43,6 +65,22 @@ Fonte integral: `evidencias/browser.json`. Captura em 2026-09-23T23:49:43.972Z.
 - Geometria visível: 2858 triângulos e 60 chamadas de desenho nesta captura.
 - O tempo de CPU mede o trecho entre o início do callback e o retorno de renderer.render. Não mede a execução completa da GPU. O intervalo inclui a cadência do navegador e o agendamento do ambiente.
 - A captura é uma medição pontual, não um benchmark de desempenho de computadores da turma. A largura móvel de 390 × 844 verifica layout somente, sem simular capacidades XR.
+
+## Sonda nos aparelhos
+
+| | Computador do grupo | Celular (POCO X5 Pro 5G) |
+| --- | --- | --- |
+| Janela / VR / AR | suportado / não / não | suportado / suportado / suportado |
+| Sessão aberta | nenhuma | immersive-ar, encerrada em seguida |
+| Recursos concedidos | não se aplica | local-floor, unbounded, hit-test, anchors, plane-detection |
+| Pedidos e não concedidos | não se aplica | bounded-floor, dom-overlay, hand-tracking |
+| Graus de liberdade | não se aplica | seis (7 poses, nenhuma emulada) |
+| Fontes de entrada | não se aplica | nenhuma durante a sondagem (sem toque na tela) |
+| Capturas | `evidencias/sonda-pc.png` | `evidencias/sonda-celular-*.jpg` |
+
+- A classe exibida no celular ("visor que acompanha rotação e deslocamento") está errada. `graus.ts` só reconhece aparelho de mão quando há AR sem VR, e o Chrome do Android declara os dois.
+- O dom-overlay não concedido vem do pedido: a sonda não informa o `root` exigido. Não é resultado do aparelho.
+- A primeira sondagem do computador foi descartada. A extensão Immersive Web Emulator declarou VR, AR e controles de Quest 3 num notebook sem visor. É o caso que o slide 4 descreve: o que conta é o que a sessão concede, não a identificação.
 
 ## Troca de pai
 
@@ -65,8 +103,8 @@ A composição é `M_mundo = M_pai × M_local`. Ao trocar de pai, `M_local_nova 
 ## Pendências que também aparecem no slide 7
 
 - Criar e publicar a etiqueta `modulo-03` depois do último commit.
-- Completar o registro do teste local já realizado no celular: modelo, navegador e resultados da sonda. A comparação documentada entre classes de aparelho depende desses dados.
-- Medir custo e cadência no computador do grupo. A cadência do container excedeu 16,67 ms.
+- Sondar um visor físico. Computador e celular já foram sondados e medidos.
+- Corrigir na sonda a classe do celular (hoje sai "visor") e o pedido de dom-overlay sem `root`.
 - Confirmar execução por alguém de fora do grupo, em outra máquina, a partir da etiqueta.
 - Cada integrante explicar um slide que não produziu, sem ler roteiro.
 - A montagem completa, o alcance sentado e a bateria em VR/AR são próximos módulos. Não são demonstrados como prontos.
