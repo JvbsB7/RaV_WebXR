@@ -1,0 +1,38 @@
+Sonda de capacidades
+
+Esta página pergunta ao aparelho o que ele oferece (que regimes suporta, que recursos concede, que fontes de entrada declara, quantos graus de liberdade rastreia) e mostra a resposta aqui, para ser lida no próprio aparelho sondado. Abrir este mesmo endereço num desktop, num celular e num visor deve produzir três relatórios diferentes.
+
+Regimes: o que este aparelho responde
+
+Esta é a pergunta grossa, e é a única que se responde sem abrir sessão alguma: o aparelho entra neste regime? O que ele concede uma vez lá dentro está na sonda, mais abaixo, e espera um toque no botão.
+
+Regime	O que faz com o mundo	Neste aparelho
+Janela	ignora o mundo: a cena vive dentro do retângulo da página	suportado. O navegador declara suportar este regime. O que ele concede lá dentro só a sessão diz.
+Imersivo virtual	substitui o mundo: nada do ambiente físico é composto no quadro	não suportado. O navegador declara não suportar este regime neste aparelho.
+Imersivo aumentado	compõe sobre o mundo: o fundo é a imagem do ambiente físico	não suportado. O navegador declara não suportar este regime neste aparelho.
+A metade que só a sessão responde
+
+Recursos concedidos, espaços de referência entregues e fontes de entrada são propriedades da sessão, e não do navegador. Sondá-los de fora devolveria uma lista de suposições.
+
+Sondar este aparelho
+Sonda de capacidades
+
+Aparelho que só sustenta o regime de janela. É o caso do desktop comum.
+
+A classe acima foi deduzida do que o aparelho concedeu, e não do nome que o navegador diz ter. A cadeia de identificação é editável, imitada por outros aparelhos e envelhece a cada versão; o que a sessão concede é o que este aparelho faz agora.
+
+A página está em contexto seguro, então a ausência de um recurso é resposta do aparelho.
+
+Este aparelho não declara sessão imersiva alguma, e metade da sonda não tem onde acontecer. É informação sobre o aparelho, e não defeito do código.
+
+Diário
+
+O que aconteceu, escrito onde se possa ler. Dentro de um visor não existe console de depuração: quem está com a tela no rosto não abre painel de desenvolvedor e não vê exceção alguma.
+
+09:49:48 · Consulta sem sessão concluída. A metade que só a sessão responde espera um toque no botão.
+
+09:49:48 · Sondando. Se o aparelho pedir permissão, aceite: sem ela a sessão não abre, e a recusa aparece aqui como falha.
+
+09:49:48 · Sondagem concluída sem sessão. O relatório diz por quê, e isso é resultado, não erro.
+
+Abrir demonstração da bateria acústica — Módulo 03.

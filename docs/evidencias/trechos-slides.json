@@ -1,0 +1,32 @@
+[
+  {
+    "slide": 3,
+    "file": "ts/src/bancada/modes/regimes.ts",
+    "code": "    id: 'immersive-ar',\n    referencia: 'local; viewer para o raio do hit-test',"
+  },
+  {
+    "slide": 4,
+    "file": "ts/src/bancada/modes/verificacao.ts",
+    "code": "    const suportado: boolean = await xr.isSessionSupported(regime.id);"
+  },
+  {
+    "slide": 4,
+    "file": "ts/src/bancada/devices/sonda.ts",
+    "code": "  const sessao: XRSession = await xr.requestSession(modo, {\n    optionalFeatures: nomesConsultados(),\n  });"
+  },
+  {
+    "slide": 5,
+    "file": "ts/src/bateria/cena.ts",
+    "code": "    no.name = nome;\n    no.position.set(x, y, z);\n    pai.add(no);"
+  },
+  {
+    "slide": 6,
+    "file": "ts/src/bateria/hierarquia.ts",
+    "code": "  const antes = objeto.getWorldPosition(new Vector3());\n  novoPai.attach(objeto);\n  const depois = objeto.getWorldPosition(new Vector3());\n  const erro = antes.distanceTo(depois);"
+  },
+  {
+    "slide": 7,
+    "file": "ts/src/main.ts",
+    "code": "  const { delta, intervaloMs } =\n    relogio.avancar(instanteMs);\n  if (movimento) tempoDoMovimento += delta;"
+  }
+]

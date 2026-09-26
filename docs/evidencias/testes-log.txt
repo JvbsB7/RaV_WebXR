@@ -1,0 +1,36 @@
+OK: objetos, dimensões, parentesco real e movimento herdado.
+OK: troca preserva a matriz de mundo com rotação e escala uniforme; ciclos e escalas inválidas são recusados.
+OK: mesma altura após 2 s a 30, 60 e 144 quadros/s, proteção de pausa e inferência por poses.
+{
+  "alturasApos2s": [
+    1.209115691219082,
+    1.2091156912190817,
+    1.2091156912190815
+  ],
+  "troca": {
+    "antes": [
+      -1.75,
+      0.761,
+      0.3
+    ],
+    "depois": [
+      -1.7499999999999998,
+      0.761,
+      0.30000000000000004
+    ],
+    "erro": 2.2887833992611187e-16
+  },
+  "fronteira": {
+    "antes": [
+      1.8361268274881004,
+      3.21997897556928,
+      -3.4900441077327793
+    ],
+    "depois": [
+      1.8361268274880995,
+      3.2199789755692794,
+      -3.4900441077327793
+    ],
+    "erro": 9.930136612989092e-16
+  }
+}
