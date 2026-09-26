@@ -9,6 +9,5 @@ export const PECAS = [
 ] as const;
 export const TAREFA = 'Montar as seis peças da bateria e verificar o alcance sentado.';
 export const ESTADO_FINAL = 'Seis peças nos apoios corretos, nas alturas previstas e alcançáveis com os bastões.';
-export const TETO_MS = 1000 / 60;
 export const AMPLITUDE_M = 0.12;
 export const FREQUENCIA_RAD_S = 1;
