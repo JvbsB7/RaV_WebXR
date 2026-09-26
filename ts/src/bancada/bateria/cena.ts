@@ -11,7 +11,7 @@ export function criarBateria() {
   sala.add(luz);
   const material = (color: string) => new THREE.MeshStandardMaterial({ color, roughness: 1 });
   const metal = material('#8997a4'), pele = material('#e8ded1'), casco = material('#a55235');
-  const cinza = material('#5b6b76'), piso = material('#263340');
+  const dourado = material('#d2ad62'), cinza = material('#5b6b76'), piso = material('#263340');
 
   function grupo(nome: string, pai: THREE.Object3D, x = 0, y = 0, z = 0) {
     const no = new THREE.Group();
@@ -67,6 +67,12 @@ export function criarBateria() {
   cilindro('assento', 0.18, 0.06, casco, banco, 0, 0.47);
   cilindro('pe-do-banco', 0.035, 0.44, metal, banco, 0, 0.22);
   cilindro('base-do-banco', 0.22, 0.03, metal, banco, 0, 0.015);
+  const bastoes = grupo('bastoes', banco, 0, 0.55);
+  for (const x of [-0.1, 0.1]) {
+    const bastao = cilindro('bastao-' + (x < 0 ? '1' : '2'), 0.007, 0.4, dourado, bastoes, x);
+    bastao.rotation.x = Math.PI / 2;
+  }
+  bastoes.visible = false; // Estado inicial exigido pela especificação.
 
   const mesa = grupo('mesa', sala, -1.75);
   const tampo = caixa('tampo', 2.2, 0.04, 1.2, cinza, mesa, 0, 0.74);
@@ -75,11 +81,10 @@ export function criarBateria() {
   }
   const pecas = new Map<string, THREE.Mesh>();
   for (const [i, peca] of PECAS.entries()) {
-    if (peca.id.startsWith('prato')) continue; // Os pratos entram em commit próprio.
-    const mat = [casco, pele, casco];
+    const mat = peca.id.startsWith('prato') ? dourado : [casco, pele, casco];
     const no = cilindro(peca.id, peca.diametro / 2, peca.profundidade, mat,
       tampo, (i % 3 - 1) * 0.65, 0.02 + peca.profundidade / 2, i < 3 ? -0.3 : 0.3);
     pecas.set(peca.id, no);
   }
-  return { sala, bateria, estrutura, mesa, tampo, pecas, suportes };
+  return { sala, bateria, estrutura, mesa, tampo, pecas, suportes, bastoes };
 }
