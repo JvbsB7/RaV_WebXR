@@ -361,8 +361,10 @@ escreveu. O que pode derrubar o quadro está listado adiante.
 
 **Metas de fluidez, uma por regime.** São três porque as três têm relógios diferentes:
 
-- **Tela:** meta de 60 FPS, ainda a medir numa máquina do grupo com vídeo integrado e sem placa dedicada.
-  Este é o número que vale como promessa, porque é o único regime que garantimos.
+- **Tela:** meta de 60 FPS. Medida em 2026-09-26 numa máquina do grupo com vídeo integrado e sem placa
+  dedicada (Dell Inspiron 15 3530, Intel Iris Xe): intervalo médio de 16,67 ms, no limite de uma tela de
+  60 Hz, com CPU média de 1,10 ms. Medida pontual com a cena atual; GPU não cronometrada. Detalhes em
+  `docs/modulo03.md`. Este é o número que vale como promessa, porque é o único regime que garantimos.
 - **Visor:** alvo provisório de 72 Hz. A taxa efetiva depende do aparelho e da sessão e ainda não foi medida pelo grupo.
 - **Câmera:** alvo provisório de 30 FPS, a revisar segundo a cadência e o custo da sessão real.
 
@@ -617,3 +619,4 @@ porque a diferença entre as duas versões é grande, e quem comparar rascunhos 
 - O teto declarado para tela é 1000/60 ms, mostrado como 16,67 ms. O painel na estrutura informa o trabalho de CPU do laço e o intervalo entre quadros, sobre até 120 amostras. GPU não é cronometrada. Medição em renderizador por software não representa o desempenho de aparelhos reais.
 - A sonda deixou de inferir 6DoF por local-floor. Ela consulta poses do observador em um espaço local e observa emulatedPosition. Sem evidência de posição rastreada, informa indeterminado. Um recurso ausente de enabledFeatures é apenas não concedido: a lista não revela se faltou suporte ou autorização. Ausência da API e recusa da sessão continuam separadas nas mensagens.
 - O assistente Codex implementou o código do marco e preparou os slides com base nesta especificação. O grupo ainda deve revisar o código, confirmar as decisões e realizar o ensaio cruzado. A implementação dos conceitos foi escrita para a bateria; o exemplo do professor serviu como referência de requisitos, não como cena do grupo.
+- Uso de IA no Módulo 03, declarado pelo grupo: assistentes de IA (Claude e Codex) foram usados para entender como o trabalho deveria ser realizado, porque o grupo não conhecia a base do conteúdo; para ajudar na arquitetura do código; para ajudar a montar os slides; e para documentar. As medições e as capturas do notebook e do celular (26/09/2026) foram feitas pelo grupo nos próprios aparelhos; o assistente as transcreveu para a documentação e para os slides 4 e 7.

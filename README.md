@@ -56,8 +56,35 @@ O teste numérico confere dimensões, herança de transformação, posição e m
 - [Aparelhos e regimes testados](docs/aparelhos.md).
 - `docs/evidencias/`: resultados reais dos testes e capturas usadas nos slides.
 
+## Onde já foi visto funcionando
+
+Em 2026-09-26, pelo `pnpm dev` do computador do grupo:
+
+- **Notebook Dell Inspiron 15 3530** (Intel Core i5-1334U, Iris Xe, Windows 11, Chrome 153): a cena por tela abriu, com CPU média de 1,10 ms e intervalo de 16,67 ms. A sonda declarou só o regime de janela.
+- **Celular POCO X5 Pro 5G** (Android 14, Chrome 153), pela rede local: a cena por tela abriu, com CPU média de 0,56 ms e intervalo de 16,36 ms. A sonda abriu uma sessão immersive-ar e registrou seis graus de liberdade.
+
+O que abriu e o que não abriu em cada aparelho está em [docs/aparelhos.md](docs/aparelhos.md). Os números vêm de `docs/evidencias/medicao-pc.json` e `medicao-celular.json`.
+
 ## Limitações declaradas
 
-A montagem completa, a validação de alcance, os modelos externos e a bateria nos regimes VR/AR ainda são etapas futuras. A sonda pode abrir uma sessão curta para consultar capacidades, o que não significa que a cena da bateria esteja disponível nesses regimes. O grupo confirmou o teste local no celular. Falta completar o registro do aparelho e dos resultados da sonda para comparar as classes de aparelho. A medição em máquinas reais, a execução por alguém de fora do grupo e o ensaio cruzado continuam pendentes. Consulte o slide 7 e `docs/aparelhos.md`.
+A montagem completa, a validação de alcance, os modelos externos e a bateria nos regimes VR/AR ainda são etapas futuras. A sonda pode abrir uma sessão curta para consultar capacidades, o que não significa que a cena da bateria esteja disponível nesses regimes.
+
+- A sonda classifica o celular como "visor", porque só reconhece aparelho de mão quando há AR sem VR. Ela também pede dom-overlay sem o `root` que esse recurso exige. As duas correções foram adiadas; o que conta no registro é o que a sessão concedeu.
+- Nenhum visor físico foi sondado ainda.
+- O tempo da GPU não é medido.
+- A execução por alguém de fora do grupo e o ensaio cruzado continuam pendentes.
+
+Consulte o slide 7 e `docs/aparelhos.md`.
+
+## Uso de inteligência artificial
+
+O grupo usou assistentes de IA (Claude e Codex) neste trabalho para:
+
+- entender como o trabalho deveria ser realizado, porque o grupo não conhecia a base do conteúdo;
+- ajudar na arquitetura do código;
+- ajudar a montar os slides;
+- documentar o projeto.
+
+O detalhamento do que veio do grupo e do que veio do assistente na especificação está em `docs/especificacao.md`, seção 14, "Sobre o uso de ferramentas de IA". As medições e as capturas dos aparelhos foram feitas pelo grupo nos próprios aparelhos.
 
 Os arquivos antigos `ts/src/scene.ts`, `controllers.ts` e `ar.ts` permanecem como histórico da base inicial, sem importação pela demonstração do Módulo 03.

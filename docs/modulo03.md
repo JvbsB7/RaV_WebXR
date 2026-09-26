@@ -47,6 +47,7 @@ Medições em aparelhos reais, com `/cena.html` servido pelo `pnpm dev` do compu
 - No celular, a média ficou abaixo do teto, mas quadros isolados passam dele: a captura `evidencias/cena-celular.jpg` mostra intervalo de 16,71 ms naquele instante. Não há alegação de 60 FPS sustentados em nenhum dos dois.
 - Nos dois aparelhos a CPU gasta menos de 7% do teto. O custo da GPU não é medido, então esse número sozinho não garante fluidez.
 - As capturas `evidencias/cena-pc.png` e `evidencias/cena-celular.jpg` mostram o painel em outro instante das mesmas execuções (PC: CPU 1,07 ms, intervalo 16,67 ms; celular: CPU 0,47 ms, intervalo 16,71 ms).
+- O slide 7 mostra a média do computador (1,10 ms e 16,67 ms) e a do celular (0,56 ms e 16,36 ms). A imagem do painel no slide é `evidencias/painel-pc.png`, recorte sem alteração de `evidencias/cena-pc.png`: origem (895, 370), largura 300 e altura 211 pixels, ampliado para 580 × 408.
 - São medições pontuais de um aparelho de cada classe, não um benchmark.
 
 ### Captura automatizada anterior (container)
@@ -59,8 +60,8 @@ Fonte integral: `evidencias/browser.json`. Captura em 2026-09-23T23:49:43.972Z. 
 - Renderizador declarado: `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)`.
 - Viewport do canvas: 1265 × 863 pixels. Pixel ratio: 1.
 - Janela: 120 quadros recentes. CPU média: **0.74 ms**. Intervalo médio: **30.83 ms**.
-- A imagem `evidencias/cena-slide.png` mostra outro instante da mesma execução: CPU 0,71 ms e intervalo 34,58 ms. O painel se atualiza a cada 0,5 s; os valores grandes do slide 7 correspondem à amostra do JSON acima.
-- `evidencias/painel-captura.png` é apenas o recorte desse painel, sem alteração dos números: origem (765, 220), largura 290 e altura 204 pixels na imagem anterior.
+- A imagem `evidencias/cena-slide.png` mostra outro instante da mesma execução: CPU 0,71 ms e intervalo 34,58 ms. O painel se atualiza a cada 0,5 s.
+- `evidencias/painel-captura.png` é apenas o recorte desse painel, sem alteração dos números: origem (765, 220), largura 290 e altura 204 pixels na imagem anterior. O slide 7 usava esses valores até a medição nos aparelhos reais.
 - Teto: **16.67 ms** (1000 / 60). O intervalo observado excedeu o teto; não há alegação de 60 FPS sustentados.
 - Geometria visível: 2858 triângulos e 60 chamadas de desenho nesta captura.
 - O tempo de CPU mede o trecho entre o início do callback e o retorno de renderer.render. Não mede a execução completa da GPU. O intervalo inclui a cadência do navegador e o agendamento do ambiente.
