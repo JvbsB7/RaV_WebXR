@@ -1,5 +1,7 @@
 # Especificação do Projeto Integrador
 
+> **Estado no Módulo 03:** cena por tela com primitivas, hierarquia, troca de pai e custo do quadro. As interações de montagem, alcance, modelos glTF e modos imersivos abaixo descrevem o projeto completo e ainda não estão implementados neste marco. Evidências e limitações: [modulo03.md](modulo03.md).
+
 ## Seção 1. Identificação do grupo e da cena
 
 **Grupo 1** — Ian Jabriel 1962004, João Vitor RA: 1963129, Gabriel Lenzi RA:1960578, Vinicius Gatti RA:2002594, Gabriel Verri RA: 1978701 e David Martins RA: 1977953.
@@ -325,6 +327,16 @@ explicação — eles simplesmente ainda não existem, e a frase da Seção 5 di
 
 ## Seção 9. Os três regimes
 
+Declaração do espaço, rastreamento e registro, também mantida em `ts/src/bancada/modes/regimes.ts`:
+
+| Regime | Referência pretendida | Rastreia | Registro contra |
+| --- | --- | --- | --- |
+| Tela / janela | Origem da cena (viewer se houver sessão inline) | Nenhum movimento corporal; câmera orbital por mouse | Origem virtual da sala, sem registro físico |
+| Visor / VR | local-floor | Cabeça e controles/mãos, conforme poses concedidas | Chão estimado ou medido, escala 1:1 |
+| Câmera / AR | local; viewer para o raio do hit-test | Pose do aparelho e superfícies concedidas | Superfície real escolhida por hit-test, escala 1:5 |
+
+A demonstração do Módulo 03 usa renderização WebGL na página, sem solicitar sessão XR inline. VR e AR são declarações para os módulos futuros. Detectar suporte pela sonda não comprova que a bateria roda nesses regimes.
+
 | Aspecto | Na tela | No visor | Pela câmera |
 | --- | --- | --- | --- |
 | Como se olha | Câmera orbital: arrastar com o botão direito gira em torno do kit, a roda aproxima. O ponto de vista parte da altura do banco, mas pode sair dele. | A cabeça é o ponto de vista, seis graus de liberdade. Olhar embaixo do tambor é abaixar o corpo, não apertar tecla. | A cena está ancorada na mesa de verdade. Mudar de ângulo é andar em volta da mesa com o aparelho na mão. |
@@ -349,12 +361,10 @@ escreveu. O que pode derrubar o quadro está listado adiante.
 
 **Metas de fluidez, uma por regime.** São três porque as três têm relógios diferentes:
 
-- **Tela:** 60 FPS, medido numa máquina do grupo com vídeo integrado e sem placa dedicada.
+- **Tela:** meta de 60 FPS, ainda a medir numa máquina do grupo com vídeo integrado e sem placa dedicada.
   Este é o número que vale como promessa, porque é o único regime que garantimos.
-- **Visor:** 72 Hz. Não é escolha nossa — é a taxa que o aparelho impõe, e a obrigação do
-  projeto é entregar um quadro dentro dela, não escolher outra.
-- **Câmera:** 30 FPS. O vídeo da câmera já chega a 30 na maioria dos aparelhos, e desenhar
-  mais rápido que a imagem de fundo não melhora nada que a pessoa veja.
+- **Visor:** alvo provisório de 72 Hz. A taxa efetiva depende do aparelho e da sessão e ainda não foi medida pelo grupo.
+- **Câmera:** alvo provisório de 30 FPS, a revisar segundo a cadência e o custo da sessão real.
 
 **Repetição barata e repetição cara.** Os quatro tambores são a mesma malha carregada uma
 vez e desenhada quatro, em escalas diferentes; os dois pratos, idem. Um material de cor
@@ -595,3 +605,15 @@ O primeiro conjunto de números trazido ao assistente descrevia, em parte, uma b
 milímetros. Aquilo foi identificado como incompatível com a cena escolhida e descartado; os
 números que estão neste documento foram refeitos para uma bateria acústica. Fica registrado
 porque a diferença entre as duas versões é grande, e quem comparar rascunhos vai notar.
+
+
+### Decisões do Módulo 03 (23/09/2026)
+
+- A geometria atual usa caixas, cilindros e anéis gerados em código. Os arquivos glTF da Seção 12 continuam planejados para o bloco 7. Nenhum ativo externo é carregado pela demonstração atual. O texto do painel usa uma textura canvas gerada pelo programa, exclusivamente para mostrar as medições.
+- A mesa mede 2,20 × 1,20 m, com tampo de 0,04 m e superfície a 0,76 m. A área total com mesa é maior que a área útil de 1,80 × 1,50 m destinada ao kit. O banco começa a 0,50 m de altura. Os bastões de 0,40 m existem no grafo e permanecem ocultos no estado inicial, conforme a Seção 6.
+- A garra é filha do suporte porque a regulagem de altura transporta o apoio inteiro. O Prato 1 começa no tampo e pode trocar de pai para o suporte sem encaixar automaticamente. Esta operação demonstra composição de transformações, não valida a montagem final.
+- A alternativa de atualizar coordenadas de cada descendente foi descartada: duplicaria o cálculo que a árvore já propaga e poderia deixar pai e filho fora de sincronia.
+- A regulagem demonstrativa tem amplitude de 0,12 m e frequência angular de 1 rad/s. Ela usa tempo transcorrido, com salto limitado a 0,1 s após suspensão da aba. As dimensões ficam na geometria, mantendo escala uniforme nos nós. A troca rejeita ciclos, escala nula, negativa ou não uniforme, evitando decomposições com cisalhamento.
+- O teto declarado para tela é 1000/60 ms, mostrado como 16,67 ms. O painel na estrutura informa o trabalho de CPU do laço e o intervalo entre quadros, sobre até 120 amostras. GPU não é cronometrada. Medição em renderizador por software não representa o desempenho de aparelhos reais.
+- A sonda deixou de inferir 6DoF por local-floor. Ela consulta poses do observador em um espaço local e observa emulatedPosition. Sem evidência de posição rastreada, informa indeterminado. Um recurso ausente de enabledFeatures é apenas não concedido: a lista não revela se faltou suporte ou autorização. Ausência da API e recusa da sessão continuam separadas nas mensagens.
+- O assistente Codex implementou o código do marco e preparou os slides com base nesta especificação. O grupo ainda deve revisar o código, confirmar as decisões e realizar o ensaio cruzado. A implementação dos conceitos foi escrita para a bateria; o exemplo do professor serviu como referência de requisitos, não como cena do grupo.

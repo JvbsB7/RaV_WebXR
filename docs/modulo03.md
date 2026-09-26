@@ -1,6 +1,6 @@
 # Módulo 03: implementação, evidências e limites
 
-Estado do projeto baseado no commit anterior `8c27796`. A etiqueta local da entrega é `modulo-03`. A publicação no GitHub depende de autenticação, indisponível nesta sessão. Os caminhos abaixo são relativos à raiz.
+Estado do projeto a partir do commit `8c27796` (especificação do Módulo 01). A versão entregue é a marcada com a etiqueta `modulo-03` no GitHub. Os caminhos abaixo são relativos à raiz.
 
 ## Os nove passos, conferidos pelo pronto quando
 
@@ -64,7 +64,7 @@ A composição é `M_mundo = M_pai × M_local`. Ao trocar de pai, `M_local_nova 
 
 ## Pendências que também aparecem no slide 7
 
-- Publicar os arquivos e a etiqueta no GitHub autenticado.
+- Criar e publicar a etiqueta `modulo-03` depois do último commit.
 - Completar o registro do teste local já realizado no celular: modelo, navegador e resultados da sonda. A comparação documentada entre classes de aparelho depende desses dados.
 - Medir custo e cadência no computador do grupo. A cadência do container excedeu 16,67 ms.
 - Confirmar execução por alguém de fora do grupo, em outra máquina, a partir da etiqueta.

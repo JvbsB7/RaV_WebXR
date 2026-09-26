@@ -23,3 +23,6 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# O projeto usa pnpm (ver README); o npm gera este arquivo à parte
+package-lock.json

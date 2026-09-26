@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { criarBateria } from './bancada/bateria/cena.ts';
-import { PECAS, TAREFA, AMPLITUDE_M, FREQUENCIA_RAD_S, TETO_MS } from './bancada/bateria/dominio.ts';
-import { reparentar, descreverArvore } from './bancada/bateria/hierarquia.ts';
-import { Relogio, Orcamento } from './bancada/bateria/tempo.ts';
-import { criarPainel } from './bancada/bateria/painel.ts';
+import { criarBateria } from './bateria/cena.ts';
+import { PECAS, TAREFA, AMPLITUDE_M, FREQUENCIA_RAD_S, TETO_MS } from './bateria/dominio.ts';
+import { reparentar, descreverArvore } from './bateria/hierarquia.ts';
+import { Relogio, Orcamento } from './bateria/tempo.ts';
+import { criarPainel } from './bateria/painel.ts';
 
 const tela = document.querySelector<HTMLDivElement>('#app')!;
 const renderer = new THREE.WebGLRenderer({ antialias: true });
