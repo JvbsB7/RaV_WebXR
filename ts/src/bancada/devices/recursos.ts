@@ -5,11 +5,11 @@
 // Este arquivo existe por causa de uma distinção que o enunciado cobra e que a
 // API não entrega pronta: recurso que o aparelho NÃO TEM e recurso que ele TEM e
 // NÃO CONCEDEU passam os dois pelo mesmo canal, o `optionalFeatures`, e os dois
-// simplesmente não aparecem depois. Distinguir os dois é trabalho manual, e é
-// aqui que ele é feito.
+// simplesmente não aparecem depois. A lista sozinha não revela a causa. A sonda preserva
+// ausência de API e recusa de sessão separadamente no relatório e no diário.
 //
 // O estado que mais custa a escrever e mais evita erro é o terceiro:
-// `indeterminado`. `XRSession.enabledFeatures` é opcional na especificação, e um
+// `indeterminado`. Algumas implementações não expõem `XRSession.enabledFeatures`, e um
 // navegador pode abrir sessão sem dizer o que ligou. Sem o terceiro estado, esse
 // navegador entra no relatório como aparelho que negou tudo: um aparelho
 // competente descrito como incapaz, numa tabela completa e convincente.
@@ -19,13 +19,13 @@
  * O que se sabe sobre um recurso depois de a sessão abrir.
  *
  * - `concedido`: o nome veio em `enabledFeatures`. Pode ser usado.
- * - `negado`: a sessão reportou a lista e o nome não está nela. Houve resposta,
+ * - `nao-concedido`: a sessão reportou a lista e o nome não está nela. Houve resposta,
  *   e a resposta foi não. A razão não é exposta pela API.
  * - `indeterminado`: a sessão não reportou lista alguma. Não houve resposta, e
  *   tratar ausência de resposta como negativa é o que produz relatório
  *   confiante e errado.
  */
-export type EstadoDeRecurso = 'concedido' | 'negado' | 'indeterminado';
+export type EstadoDeRecurso = 'concedido' | 'nao-concedido' | 'indeterminado';
 
 export interface RecursoOpcional {
   /** O nome exato que `optionalFeatures` aceita. Não traduzir. */
@@ -86,7 +86,7 @@ export const RECURSOS_CONSULTADOS: readonly RecursoOpcional[] = [
  * Classifica um recurso contra a lista que a sessão reportou.
  *
  * `concedidos` vem de `XRSession.enabledFeatures`. `undefined` ali significa
- * "esta sessão não diz", e é o que produz `indeterminado`, nunca `negado`.
+ * "esta sessão não diz", e é o que produz `indeterminado`, nunca `nao-concedido`.
  */
 export function estadoDoRecurso(
   nome: string,
@@ -95,7 +95,7 @@ export function estadoDoRecurso(
   if (concedidos === undefined) {
     return 'indeterminado';
   }
-  return concedidos.includes(nome) ? 'concedido' : 'negado';
+  return concedidos.includes(nome) ? 'concedido' : 'nao-concedido';
 }
 
 /** Os nomes que a sonda envia em `optionalFeatures`. */

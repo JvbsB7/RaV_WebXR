@@ -101,6 +101,8 @@ export interface SondaEmSessao {
   readonly espacosConcedidos: readonly string[];
   readonly fontesDeEntrada: readonly FonteDeEntradaSondada[];
   readonly graus: GrausDeLiberdade;
+  readonly posesObservadas: number;
+  readonly posesEmuladas: number;
 }
 
 export interface ResultadoDaSonda {
@@ -190,21 +192,30 @@ function declararCamadaMinima(sessao: XRSession): void {
   sessao.updateRenderState({ baseLayer: new XRWebGLLayer(sessao, gl) });
 }
 
-/** Deixa passar alguns quadros, para dar tempo de as fontes de entrada aparecerem. */
-function aguardarQuadros(sessao: XRSession, quantos: number): Promise<void> {
-  return new Promise<void>((resolver) => {
-    let restantes: number = quantos;
-
-    const passo: XRFrameRequestCallback = (): void => {
-      restantes -= 1;
-      if (restantes > 0) {
-        sessao.requestAnimationFrame(passo);
-        return;
-      }
-      resolver();
+/** Observação limitada no tempo, inclusive se a sessão perder foco ou terminar. */
+function observarPoses(sessao: XRSession, referencia: XRReferenceSpace) {
+  return new Promise<{ observadas: number; emuladas: number }>((resolve) => {
+    let observadas = 0, emuladas = 0, quadros = 0, pedido = 0, encerrado = false;
+    const concluir = () => {
+      if (encerrado) return;
+      encerrado = true;
+      clearTimeout(limite);
+      sessao.cancelAnimationFrame(pedido);
+      sessao.removeEventListener('end', concluir);
+      resolve({ observadas, emuladas });
     };
-
-    sessao.requestAnimationFrame(passo);
+    const limite = setTimeout(concluir, 5000);
+    const passo: XRFrameRequestCallback = (_tempo, quadro) => {
+      const pose = quadro.getViewerPose(referencia);
+      if (pose) {
+        observadas++;
+        if (pose.emulatedPosition) emuladas++;
+      }
+      if (++quadros >= QUADROS_ATE_LER_ENTRADAS) concluir();
+      else pedido = sessao.requestAnimationFrame(passo);
+    };
+    sessao.addEventListener('end', concluir);
+    pedido = sessao.requestAnimationFrame(passo);
   });
 }
 
@@ -222,13 +233,16 @@ export async function sondarEmSessao(modo: ModoSondavel): Promise<SondaEmSessao>
     optionalFeatures: nomesConsultados(),
   });
 
+  let encerrada = false;
+  sessao.addEventListener('end', () => { encerrada = true; });
   try {
     declararCamadaMinima(sessao);
 
     const concedidos: readonly string[] | undefined = sessao.enabledFeatures;
     const espacos: string[] = await lerEspacos(sessao);
 
-    await aguardarQuadros(sessao, QUADROS_ATE_LER_ENTRADAS);
+    const referencia = await sessao.requestReferenceSpace(espacos.includes('local-floor') ? 'local-floor' : 'local');
+    const poses = await observarPoses(sessao, referencia);
     const fontes: FonteDeEntradaSondada[] = lerFontesDeEntrada(sessao);
 
     return {
@@ -240,14 +254,16 @@ export async function sondarEmSessao(modo: ModoSondavel): Promise<SondaEmSessao>
       })),
       espacosConcedidos: espacos,
       fontesDeEntrada: fontes,
-      graus: grausDeLiberdade(espacos),
+      graus: grausDeLiberdade(poses.observadas, poses.emuladas),
+      posesObservadas: poses.observadas,
+      posesEmuladas: poses.emuladas,
     };
   } finally {
     // A sessão precisa terminar mesmo quando a sondagem falha no meio. A razão é
     // física, e não estética: sessão imersiva viva com a página parada prende o
     // visor numa tela vazia, e quem está com o aparelho no rosto só sai pelo menu
     // do sistema.
-    await sessao.end();
+    if (!encerrada) await sessao.end();
   }
 }
 
@@ -264,8 +280,8 @@ export function modoPreferido(
   return ordem.find((modo) => modosSuportados.includes(modo));
 }
 
-export async function sondar(): Promise<ResultadoDaSonda> {
-  const semSessao: SondaSemSessao = await sondarSemSessao();
+export async function sondar(inicial?: SondaSemSessao): Promise<ResultadoDaSonda> {
+  const semSessao: SondaSemSessao = inicial ?? await sondarSemSessao();
   const modo: ModoSondavel | undefined = modoPreferido(semSessao.modosSuportados);
 
   if (modo === undefined) {

@@ -88,7 +88,7 @@ function rotuloDoEstado(estado: EstadoDeRecurso): string {
   switch (estado) {
     case 'concedido':
       return 'concedido';
-    case 'negado':
+    case 'nao-concedido':
       return 'pedido e não concedido';
     case 'indeterminado':
       return 'sem resposta: a sessão não disse o que ligou';
@@ -102,7 +102,7 @@ function rotuloDosGraus(graus: GrausDeLiberdade): string {
     case 'seis':
       return 'seis graus de liberdade: acompanha orientação e deslocamento';
     case 'indeterminado':
-      return 'graus de liberdade indeterminados: os espaços concedidos não bastam para afirmar nem uma coisa nem outra';
+      return 'posição rastreada indeterminada: não houve pose válida ou todas as posições foram emuladas';
   }
 }
 
@@ -210,9 +210,8 @@ function blocoDosEspacos(sonda: SondaEmSessao): HTMLElement {
   bloco.appendChild(paragrafo(rotuloDosGraus(sonda.graus), `graus graus-${sonda.graus}`));
   bloco.appendChild(
     paragrafo(
-      'O número acima não foi lido do aparelho: a API não o expõe. Ele é inferido dos espaços ' +
-        'concedidos, e a inferência é conservadora: no caso ambíguo ela devolve indeterminado ' +
-        'em vez de apostar.',
+      `${sonda.posesObservadas} poses observadas, ${sonda.posesEmuladas} com posição emulada. ` +
+        'A concessão de local-floor não comprova 6DoF. Posição emulada pode indicar perda de rastreamento.',
       'nota-de-rodape',
     ),
   );

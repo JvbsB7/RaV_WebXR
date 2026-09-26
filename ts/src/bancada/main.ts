@@ -12,7 +12,7 @@
 // nem nela desenhamos.
 // ---------------------------------------------------------------------------
 
-import { sondar, sondarSemSessao, type ResultadoDaSonda } from './devices/sonda';
+import { sondar, sondarSemSessao, type ResultadoDaSonda, type SondaSemSessao } from './devices/sonda';
 import { montarRegimes, montarSonda } from './relatorio/relatorio';
 import { Diario, explicarFalha } from './relatorio/diario';
 
@@ -35,6 +35,7 @@ const raizSonda: HTMLElement = exigirElemento('sonda');
 const raizDiario: HTMLElement = exigirElemento('diario');
 const botaoSondar: HTMLButtonElement = exigirElemento('sondar') as HTMLButtonElement;
 
+let capacidadesIniciais: SondaSemSessao | undefined;
 const diario: Diario = new Diario();
 diario.fixarDestino(raizDiario);
 
@@ -53,6 +54,7 @@ if (!window.isSecureContext) {
 // precisar perguntar ao runtime do aparelho antes de saber.
 void sondarSemSessao()
   .then((semSessao) => {
+    capacidadesIniciais = semSessao;
     montarRegimes(raizRegimes, semSessao.regimes);
     diario.nota(
       semSessao.temApiXr
@@ -81,7 +83,7 @@ async function executarSonda(): Promise<void> {
   );
 
   try {
-    const resultado: ResultadoDaSonda = await sondar();
+    const resultado: ResultadoDaSonda = await sondar(capacidadesIniciais);
     montarSonda(raizSonda, resultado);
 
     diario.nota(

@@ -1,17 +1,4 @@
-// ---------------------------------------------------------------------------
-// Graus de liberdade e classe do aparelho, inferidos do que a sessão concedeu.
-//
-// A API XR não expõe um número de graus de liberdade, e isso não é omissão da
-// especificação. O navegador não conversa com o sensor: conversa com o runtime
-// do aparelho, e o que esse runtime entrega são espaços de referência. Pedir um
-// espaço é pedir uma promessa ("entrego pose medida assim"), e conceder é
-// dizer que a promessa se sustenta.
-//
-// A inferência daqui é conservadora de propósito, e o caso ambíguo devolve
-// `indeterminado` em vez de uma aposta. Um relatório que afirma seis graus com
-// evidência fraca será citado como se fosse medida; um que diz "não dá para
-// saber daqui" será verificado por alguém.
-// ---------------------------------------------------------------------------
+// Os graus de liberdade dependem das poses observadas, não dos espaços concedidos.
 
 /** O que se pode afirmar sobre rastreamento de posição a partir do concedido. */
 export type GrausDeLiberdade = 'tres' | 'seis' | 'indeterminado';
@@ -30,35 +17,15 @@ export type ClasseDeAparelho =
   | 'somente-janela'
   | 'visor-sem-posicao'
   | 'visor-com-posicao'
+  | 'visor-indeterminado'
   | 'aparelho-de-mao-com-camera';
 
 
-/**
- * A regra da inferência, escrita por extenso porque é ela que precisa poder ser
- * contestada:
- *
- * - `local-floor`, `bounded-floor` e `unbounded` exigem que o aparelho saiba
- *   onde está o chão em relação a quem observa. Um visor que só gira não tem
- *   como sustentar isso: a concessão é evidência forte de posição rastreada.
- * - `viewer` sozinho é o mínimo que qualquer sessão entrega. A origem acompanha
- *   quem observa, e translação alguma é observável a partir dela. É evidência
- *   forte da ausência.
- * - `local` no meio do caminho é ambíguo de verdade. A especificação o descreve
- *   como origem próxima de quem observa no início da sessão, e um aparelho de
- *   três graus pode concedê-lo mantendo a posição sempre na origem. Daí
- *   `indeterminado`.
- */
-export function grausDeLiberdade(concedidos: readonly string[]): GrausDeLiberdade {
-  const espacosComChao: readonly string[] = ['local-floor', 'bounded-floor', 'unbounded'];
-  const temChao: boolean = espacosComChao.some((espaco) => concedidos.includes(espaco));
-
-  if (temChao) {
-    return 'seis';
-  }
-  if (concedidos.length === 1 && concedidos[0] === 'viewer') {
-    return 'tres';
-  }
-  return 'indeterminado';
+/** Poses do observador medidas em local/local-floor, nunca o espaço viewer contra si. */
+export function grausDeLiberdade(observadas: number, emuladas: number): GrausDeLiberdade {
+  if (observadas === 0) return 'indeterminado';
+  // Posição emulada pode significar 3DoF OU perda temporária de rastreamento.
+  return emuladas < observadas ? 'seis' : 'indeterminado';
 }
 
 /**
@@ -88,6 +55,7 @@ export function classificarAparelho(
   if (suportaAr && !suportaVr) {
     return 'aparelho-de-mao-com-camera';
   }
+  if (graus === 'indeterminado') return 'visor-indeterminado';
   return graus === 'tres' ? 'visor-sem-posicao' : 'visor-com-posicao';
 }
 
@@ -100,6 +68,8 @@ export function descreverClasse(classe: ClasseDeAparelho): string {
       return 'Aparelho que só sustenta o regime de janela. É o caso do desktop comum.';
     case 'visor-sem-posicao':
       return 'Visor que acompanha a rotação da cabeça e não acompanha o deslocamento.';
+    case 'visor-indeterminado':
+      return 'Visor disponível, com rastreamento de posição ainda indeterminado.';
     case 'visor-com-posicao':
       return 'Visor que acompanha rotação e deslocamento, com o chão do ambiente como referência.';
     case 'aparelho-de-mao-com-camera':
