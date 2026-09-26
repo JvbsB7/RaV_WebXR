@@ -1,30 +1,56 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Cena — WebXR + Three.js</title>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body { height: 100%; overflow: hidden; background: #101015; }
-      #app { position: fixed; inset: 0; }
-      #info {
-        position: fixed;
-        top: 12px;
-        left: 0;
-        width: 100%;
-        text-align: center;
-        color: #fff;
-        font-family: system-ui, sans-serif;
-        font-size: 14px;
-        pointer-events: none;
-        text-shadow: 0 1px 3px rgba(0,0,0,0.6);
-      }
-    </style>
-  </head>
-  <body>
-    <div id="app"></div>
-    <div id="info">Clique em <b>ENTER VR</b> ou <b>START AR</b>. No desktop, arraste para orbitar.</div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bateria acústica · Módulo 03</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #101820; color: #ece7df; font: 17px/1.5 system-ui, sans-serif; }
+    header { padding: 22px 32px 16px; border-bottom: 1px solid #344451; }
+    header p { margin: 4px 0; color: #b8c5cd; }
+    h1 { margin: 0; font-size: 28px; font-weight: 650; }
+    h2 { font-size: 19px; margin: 24px 0 10px; }
+    a { color: #a9d8e8; }
+    main { display: grid; grid-template-columns: minmax(0, 1fr) 335px; }
+    #app { height: calc(100dvh - 137px); min-height: 550px; }
+    #app canvas { display: block; touch-action: none; }
+    aside { padding: 22px; border-left: 1px solid #344451; }
+    button { font: inherit; padding: 12px 14px; margin: 0 0 10px; width: 100%; border: 1px solid #597180; background: #223442; color: #f2efea; border-radius: 5px; cursor: pointer; }
+    button:hover, button:focus-visible { background: #355160; outline: 2px solid #9bc7d7; }
+    #trocar { background: #a65337; border-color: #cc7b55; }
+    small { font-size: 14px; color: #b8c5cd; display: block; }
+    pre { font: 13px/1.6 ui-monospace, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+    #resultado { color: #d5e8d9; min-height: 92px; }
+    details { padding: 12px 0; }
+    summary { cursor: pointer; }
+    footer { padding: 14px 32px; color: #b8c5cd; border-top: 1px solid #344451; font-size: 14px; }
+    @media (max-width: 850px) { main { display: block; } #app { height: 58dvh; min-height: 380px; } aside { border-left: 0; } header { padding: 18px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bateria acústica <span style="color:#c7976a;font-weight:400">/ Módulo 03</span></h1>
+    <p id="tarefa"></p>
+    <small>Grupo 1 · Cena por tela · Arraste para orbitar e use a roda para aproximar</small>
+  </header>
+  <main>
+    <div id="app" aria-label="Cena tridimensional da bateria acústica"></div>
+    <aside>
+      <button id="mover" aria-pressed="false">Demonstrar ajuste de altura</button>
+      <button id="trocar">Trocar pai do Prato 1</button>
+      <small>A garra acompanha o suporte. A troca de pai mantém o prato no lugar; o encaixe será implementado em outro módulo.</small>
+      <pre id="resultado" aria-live="polite">Prato 1 começa como filho do tampo.</pre>
+      <button id="reiniciar">Reiniciar demonstração</button>
+      <button id="exportar">Salvar medição deste aparelho</button>
+      <a href="/">Abrir sonda de capacidades</a>
+      <h2>Escala em metros</h2>
+      <small id="inventario"></small>
+      <details><summary>Árvore da cena</summary><pre id="arvore"></pre></details>
+      <small>O painel pertence à estrutura da bateria. CPU mede o trabalho do laço; intervalo mede a cadência entre quadros.</small>
+    </aside>
+  </main>
+  <footer>Disponível neste marco: cena, hierarquia, troca de pai e relógio. Montagem completa, alcance e modos imersivos permanecem como etapas futuras.</footer>
+  <script type="module" src="/src/main.ts"></script>
+</body>
 </html>
