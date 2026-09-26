@@ -1,3 +1,4 @@
+// cena.html: junta cena, painel, relógio e botões (4 momentos no README).
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { criarBateria } from './bateria/cena.ts';
@@ -6,12 +7,14 @@ import { reparentar, descreverArvore } from './bateria/hierarquia.ts';
 import { Relogio, Orcamento } from './bateria/tempo.ts';
 import { criarPainel } from './bateria/painel.ts';
 
+// Renderizador na div #app. XR ligado para os próximos módulos (aqui não abre sessão).
 const tela = document.querySelector<HTMLDivElement>('#app')!;
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.xr.enabled = true;
 tela.appendChild(renderer.domElement);
 const cena = criarBateria();
+// Câmera: arrastar gira, roda do mouse aproxima.
 const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 50);
 camera.position.set(3.4, 3.3, 5.7);
 const controles = new OrbitControls(camera, renderer.domElement);
@@ -20,8 +23,10 @@ controles.minDistance = 2;
 controles.maxDistance = 12;
 controles.maxPolarAngle = Math.PI / 2 - 0.05;
 controles.update();
+// Painel preso à estrutura: move junto com ela.
 const painel = criarPainel();
 cena.estrutura.add(painel.no);
+// Atores da demonstração: suporte do Prato 1 (sobe e desce) e o prato.
 const suporte = cena.suportes.get('prato-1')!;
 const prato = cena.pecas.get('prato-1')!;
 const alturaInicial = suporte.position.y;
@@ -32,16 +37,19 @@ let tempoDoMovimento = 0;
 let ultimaAtualizacao = -1;
 let ultimaTroca: ReturnType<typeof reparentar> | null = null;
 
+// Lateral da página: tarefa, medidas e árvore.
 document.querySelector('#tarefa')!.textContent = TAREFA;
 document.querySelector('#inventario')!.textContent = PECAS.map(p => `${p.nome}: Ø ${p.diametro.toFixed(2)} m`).join(' / ');
 const atualizarArvore = () => { document.querySelector('#arvore')!.textContent = descreverArvore(cena.sala).join('\n'); };
 atualizarArvore();
+// Momento 2: liga/desliga o sobe e desce do suporte (garra e anel vão junto por serem filhos).
 const botaoMover = document.querySelector<HTMLButtonElement>('#mover')!;
 botaoMover.onclick = () => {
   movimento = !movimento;
   botaoMover.textContent = movimento ? 'Pausar ajuste de altura' : 'Demonstrar ajuste de altura';
   botaoMover.setAttribute('aria-pressed', String(movimento));
 };
+// Momento 3: alterna o pai do Prato 1 (tampo <-> suporte) e mostra antes, depois e erro.
 document.querySelector<HTMLButtonElement>('#trocar')!.onclick = () => {
   const novoPai = prato.parent === suporte ? cena.tampo : suporte;
   ultimaTroca = reparentar(prato, novoPai);
@@ -52,6 +60,7 @@ document.querySelector<HTMLButtonElement>('#trocar')!.onclick = () => {
   atualizarArvore();
 };
 document.querySelector<HTMLButtonElement>('#reiniciar')!.onclick = () => location.reload();
+// Acompanha o tamanho da janela.
 function redimensionar() {
   const { width, height } = tela.getBoundingClientRect();
   renderer.setSize(width, height);
@@ -60,6 +69,7 @@ function redimensionar() {
 }
 new ResizeObserver(redimensionar).observe(tela);
 redimensionar();
+// A cada quadro: calcula o delta → move o suporte pelo tempo → atualiza o painel (0,5 s) → mede o custo.
 // recorte: laco-por-tempo
 renderer.setAnimationLoop((instanteMs) => {
   const inicio = performance.now();
@@ -78,6 +88,7 @@ renderer.setAnimationLoop((instanteMs) => {
   orcamento.registrar(performance.now() - inicio, intervaloMs);
 });
 // A mesma evidência alimenta a exportação e o teste de navegador.
+// Momento 4: é o JSON baixado por "Salvar medição deste aparelho".
 function evidencia() {
   const gl = renderer.getContext();
   const ext = gl.getExtension('WEBGL_debug_renderer_info');

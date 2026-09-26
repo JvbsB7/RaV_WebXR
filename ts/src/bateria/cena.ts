@@ -1,6 +1,14 @@
 import * as THREE from 'three';
 import { PECAS } from './dominio.ts';
 
+// Monta a cena como uma árvore: cada objeto nasce dentro do pai, com posição relativa a ele.
+//
+//   sala
+//   ├── piso, parede-fundo
+//   ├── bateria
+//   │   ├── estrutura ── suporte-<peça> ── tubo, garra, anel
+//   │   └── banco ── bastoes (ocultos)
+//   └── mesa ── tampo ── as seis peças
 export function criarBateria() {
   const sala = new THREE.Scene();
   sala.name = 'sala';
@@ -9,10 +17,13 @@ export function criarBateria() {
   const luz = new THREE.DirectionalLight(0xffffff, 2);
   luz.position.set(3, 6, 4);
   sala.add(luz);
+  // Cores lisas, sem textura.
   const material = (color: string) => new THREE.MeshStandardMaterial({ color, roughness: 1 });
   const metal = material('#8997a4'), pele = material('#e8ded1'), casco = material('#a55235');
   const dourado = material('#d2ad62'), cinza = material('#5b6b76'), piso = material('#263340');
 
+  // Auxiliares: criam, nomeiam, posicionam em relação ao pai e já penduram no pai.
+  // grupo = nó invisível, só para agrupar.
   function grupo(nome: string, pai: THREE.Object3D, x = 0, y = 0, z = 0) {
     const no = new THREE.Group();
     no.name = nome;
@@ -20,6 +31,7 @@ export function criarBateria() {
     pai.add(no);
     return no;
   }
+  // malha = objeto visível (forma + material).
   function malha(nome: string, geometria: THREE.BufferGeometry,
     mat: THREE.Material | THREE.Material[], pai: THREE.Object3D, x = 0, y = 0, z = 0) {
     const no = new THREE.Mesh(geometria, mat);
@@ -28,45 +40,57 @@ export function criarBateria() {
     pai.add(no);
     return no;
   }
+  // caixa: largura, altura, fundo (m).
   function caixa(nome: string, l: number, a: number, f: number,
     mat: THREE.Material, pai: THREE.Object3D, x = 0, y = 0, z = 0) {
     return malha(nome, new THREE.BoxGeometry(l, a, f), mat, pai, x, y, z);
   }
+  // cilindro: recebe RAIO (por isso diametro / 2 nas chamadas).
   function cilindro(nome: string, raio: number, altura: number,
     mat: THREE.Material | THREE.Material[], pai: THREE.Object3D, x = 0, y = 0, z = 0) {
     return malha(nome, new THREE.CylinderGeometry(raio, raio, altura, 24), mat, pai, x, y, z);
   }
 
+  // Sala. A posição é o centro da caixa: piso de 0,04 m em y = -0,02 deixa o topo em y = 0.
   caixa('piso', 7, 0.04, 5, piso, sala, -0.7, -0.02);
   caixa('parede-fundo', 7, 2.8, 0.04, piso, sala, -0.7, 1.4, -2.5);
+  // Kit inteiro (estrutura + banco): mover este nó move tudo.
   const bateria = grupo('bateria', sala, 0.9, 0, -0.1);
+  // Estrutura: travessa a 0,35 m e dois pés.
   const estrutura = grupo('estrutura', bateria);
   caixa('travessa', 1.45, 0.045, 0.045, metal, estrutura, 0, 0.35);
   for (const x of [-0.7, 0.7]) {
     cilindro('pe-da-estrutura', 0.024, 0.65, metal, estrutura, x, 0.325);
     caixa('base-da-estrutura', 0.08, 0.035, 0.8, metal, estrutura, x, 0.0175);
   }
+  // (x, z) de cada apoio, na ordem de PECAS.
   const posicoes = [[-0.42, 0.13], [0, -0.2], [0.44, 0.1], [0.68, 0.58], [-0.64, -0.35], [0.6, -0.38]];
+  // Suporte de cada peça, para o main.ts achar pelo id.
   const suportes = new Map<string, THREE.Group>();
   for (const [i, peca] of PECAS.entries()) {
     const [x, z] = posicoes[i];
+    // Parte fixa: braço + haste.
     caixa('braco-' + peca.id, 0.025, 0.025, Math.abs(z), metal, estrutura, x, 0.35, z / 2);
     cilindro('haste-' + peca.id, 0.012, peca.altura - 0.35, metal,
       estrutura, x, (peca.altura + 0.35) / 2, z);
+    // Parte móvel: tubo, garra e anel são filhos do suporte e sobem/descem com ele.
     const suporte = grupo('suporte-' + peca.id, estrutura, x, peca.altura, z);
     cilindro('tubo-movel-' + peca.id, 0.009, 0.30, metal, suporte, 0, -0.15);
     // A garra pertence ao suporte e acompanha a regulagem de altura.
     caixa('garra-' + peca.id, 0.12, 0.04, 0.12, metal, suporte, 0, -0.02);
+    // Anel do tamanho da peça (onde ela encaixa), girado para ficar deitado.
     const marca = malha('encaixe-' + peca.id,
       new THREE.RingGeometry(peca.diametro / 2 - 0.005, peca.diametro / 2, 32),
       new THREE.MeshBasicMaterial({ color: '#8dafbf', side: THREE.DoubleSide }), suporte);
     marca.rotation.x = -Math.PI / 2;
     suportes.set(peca.id, suporte);
   }
+  // Banco à frente da estrutura, assento a 0,47 m.
   const banco = grupo('banco', bateria, 0, 0, 1.02);
   cilindro('assento', 0.18, 0.06, casco, banco, 0, 0.47);
   cilindro('pe-do-banco', 0.035, 0.44, metal, banco, 0, 0.22);
   cilindro('base-do-banco', 0.22, 0.03, metal, banco, 0, 0.015);
+  // Bastões ficam no banco (colo de quem senta), deitados.
   const bastoes = grupo('bastoes', banco, 0, 0.55);
   for (const x of [-0.1, 0.1]) {
     const bastao = cilindro('bastao-' + (x < 0 ? '1' : '2'), 0.007, 0.4, dourado, bastoes, x);
@@ -74,13 +98,16 @@ export function criarBateria() {
   }
   bastoes.visible = false; // Estado inicial exigido pela especificação.
 
+  // Mesa onde as peças começam.
   const mesa = grupo('mesa', sala, -1.75);
   const tampo = caixa('tampo', 2.2, 0.04, 1.2, cinza, mesa, 0, 0.74);
   for (const x of [-0.95, 0.95]) for (const z of [-0.45, 0.45]) {
     caixa('pe-da-mesa', 0.055, 0.72, 0.055, metal, mesa, x, 0.36, z);
   }
+  // Seis peças filhas do tampo, 2 fileiras de 3, apoiadas em cima dele.
   const pecas = new Map<string, THREE.Mesh>();
   for (const [i, peca] of PECAS.entries()) {
+    // Prato dourado; tambor = [lateral, topo, fundo].
     const mat = peca.id.startsWith('prato') ? dourado : [casco, pele, casco];
     const no = cilindro(peca.id, peca.diametro / 2, peca.profundidade, mat,
       tampo, (i % 3 - 1) * 0.65, 0.02 + peca.profundidade / 2, i < 3 ? -0.3 : 0.3);

@@ -1,4 +1,6 @@
+// Números da especificação num lugar só: cena, painel e testes leem daqui.
 // Uma unidade equivale a um metro. Fonte: docs/especificacao.md, seção 4.
+// altura = altura do apoio, medida do chão.
 export const PECAS = [
   { id: 'caixa-1', nome: 'Caixa 1', diametro: 0.30, profundidade: 0.18, altura: 0.75 },
   { id: 'caixa-2', nome: 'Caixa 2', diametro: 0.36, profundidade: 0.22, altura: 0.75 },
@@ -7,8 +9,11 @@ export const PECAS = [
   { id: 'prato-1', nome: 'Prato 1', diametro: 0.40, profundidade: 0.002, altura: 1.10 },
   { id: 'prato-2', nome: 'Prato 2', diametro: 0.55, profundidade: 0.003, altura: 1.00 },
 ] as const;
+// Seção 6 da especificação.
 export const TAREFA = 'Montar as seis peças da bateria e verificar o alcance sentado.';
 export const ESTADO_FINAL = 'Seis peças nos apoios corretos, nas alturas previstas e alcançáveis com os bastões.';
+// 60 quadros/s = 16,67 ms por quadro (seção 10).
 export const TETO_MS = 1000 / 60;
+// Demonstração: suporte do Prato 1 sobe e desce 0,12 m, a 1 rad/s.
 export const AMPLITUDE_M = 0.12;
 export const FREQUENCIA_RAD_S = 1;
